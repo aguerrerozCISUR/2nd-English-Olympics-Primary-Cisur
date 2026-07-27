@@ -113,7 +113,7 @@
             z-index: 5;
         }
 
-        /* MENÚ DE JUEGOS - CUADRÍCULA */
+        /* MENÚ DE JUEGOS - CUADRÍCULA (Ajustada a 5 elementos) */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -123,8 +123,19 @@
             margin-bottom: 10px;
         }
 
+        /* El último elemento (juego 5) se expande a lo ancho en pantallas grandes si se desea, o mantiene la cuadrícula */
+        .menu-btn:nth-child(5) {
+            grid-column: span 2;
+            max-width: 50%;
+            margin: 0 auto;
+        }
+
         @media (max-width: 650px) {
             .menu-grid { grid-template-columns: 1fr; }
+            .menu-btn:nth-child(5) {
+                grid-column: span 1;
+                max-width: 100%;
+            }
         }
 
         .menu-btn {
@@ -142,6 +153,7 @@
             transition: all 0.1s;
             text-decoration: none;
             position: relative;
+            width: 100%;
         }
 
         .menu-btn:hover { 
@@ -235,6 +247,13 @@
                     <div class="menu-icon">🏃‍♂️</div>
                     <div class="menu-title">Game 4</div>
                     <div class="menu-desc">Complete the Sentences</div>
+                </a>
+
+                <!-- JUEGO 5 -->
+                <a href="juego5.html" class="menu-btn" onclick="playClickSound()">
+                    <div class="menu-icon">🐝</div>
+                    <div class="menu-title">Game 5</div>
+                    <div class="menu-desc">Spelling Bee</div>
                 </a>
             </div>
         </div>
