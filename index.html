@@ -113,7 +113,26 @@
             z-index: 5;
         }
 
-        /* MENÚ DE JUEGOS - CUADRÍCULA (Ajustada a 5 elementos) */
+        /* BOTÓN DE CONTROL DE MÚSICA FLOTANTE */
+        .music-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: var(--cisur-teal);
+            border: 3px solid var(--cisur-navy);
+            color: var(--cisur-white);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 3px 3px 0 var(--cisur-navy);
+            transition: all 0.1s;
+        }
+        .music-toggle:hover { background: #007c96; }
+        .music-toggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cisur-navy); }
+
+        /* MENÚ DE JUEGOS - CUADRÍCULA (5 JUEGOS) */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -123,7 +142,6 @@
             margin-bottom: 10px;
         }
 
-        /* El último elemento (juego 5) se expande a lo ancho en pantallas grandes si se desea, o mantiene la cuadrícula */
         .menu-btn:nth-child(5) {
             grid-column: span 2;
             max-width: 50%;
@@ -207,6 +225,8 @@
 <body>
 
     <div class="game-card">
+        <button class="music-toggle" id="musicToggle" onclick="toggleMusic()">🎵 MUSIC: OFF</button>
+
         <div class="credits-header">
             <img src="image_e81ebf.png" alt="CISUR Logo" class="school-logo" onerror="this.style.display='none'">
             <div>Institución Educativa Ciudadela del Sur</div>
@@ -261,6 +281,30 @@
 
     <script>
         let audioCtx = null;
+        let bgmInterval = null;
+        let isMusicPlaying = false;
+
+        // Secuencia inspirada en el icónico arpegio y melodía de "Chariots of Fire" (Vangelis)
+        const vangelisTheme = [
+            // Patrón de arpegio y notas solemnes en Do Mayor / La menor épico
+            { note: 523.25, dur: 0.18 }, // C5
+            { note: 659.25, dur: 0.18 }, // E5
+            { note: 783.99, dur: 0.18 }, // G5
+            { note: 659.25, dur: 0.18 }, // E5
+            { note: 880.00, dur: 0.35 }, // A5 (prolongada)
+            { note: 783.99, dur: 0.18 }, // G5
+            { note: 659.25, dur: 0.18 }, // E5
+            { note: 523.25, dur: 0.35 }, // C5
+            
+            { note: 587.33, dur: 0.18 }, // D5
+            { note: 698.46, dur: 0.18 }, // F5
+            { note: 880.00, dur: 0.18 }, // A5
+            { note: 698.46, dur: 0.18 }, // F5
+            { note: 987.77, dur: 0.4 },  // B5 (punto álgido)
+            { note: 880.00, dur: 0.2 },  // A5
+            { note: 783.99, dur: 0.4 }   // G5
+        ];
+        let melodyIdx = 0;
 
         function initAudio() {
             if (!audioCtx) {
@@ -269,6 +313,60 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+        }
+
+        function toggleMusic() {
+            initAudio();
+            isMusicPlaying = !isMusicPlaying;
+            const btn = document.getElementById('musicToggle');
+
+            if (isMusicPlaying) {
+                btn.textContent = "🎵 MUSIC: ON";
+                startBGM();
+            } else {
+                btn.textContent = "🎵 MUSIC: OFF";
+                stopBGM();
+            }
+        }
+
+        function startBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            
+            bgmInterval = setInterval(() => {
+                if (!isMusicPlaying || !audioCtx) return;
+                
+                const step = vangelisTheme[melodyIdx];
+                melodyIdx = (melodyIdx + 1) % vangelisTheme.length;
+
+                const now = audioCtx.currentTime;
+
+                // Sintetizador estilo analógico (onda triangular suave y envolvente tipo Vangelis)
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle'; // Sonido cálido y espacioso
+                osc.frequency.setValueAtTime(step.note, now);
+                
+                // Efecto de apertura y cierre de volumen envolvente (Attack / Decay)
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + step.dur);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + step.dur);
+
+            }, 210); // Velocidad rítmica pausada y solemne
+        }
+
+        function stopBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+            melodyIdx = 0;
         }
 
         function playClickSound() {
@@ -283,12 +381,19 @@
             osc.type = 'square';
             osc.frequency.setValueAtTime(440, now);
             osc.frequency.setValueAtTime(660, now + 0.1);
-            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.setValueAtTime(0.2, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
             
             osc.start(now);
             osc.stop(now + 0.3);
         }
+
+        // Auto-activación de audio al primer toque en la pantalla
+        document.body.addEventListener('click', function autoStartMusic() {
+            if (!audioCtx) {
+                initAudio();
+            }
+        }, { once: true });
 
         document.addEventListener('DOMContentLoaded', () => {
             if (window.twemoji) {
