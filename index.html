@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2nd English Olympic Games CISUR - Arcade Menu</title>
+    <title>2nd English Olympic Games CISUR 4th - 5th Grade- Arcade Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
     <style>
@@ -284,25 +284,25 @@
         let bgmInterval = null;
         let isMusicPlaying = false;
 
-        // Secuencia inspirada en el icónico arpegio y melodía de "Chariots of Fire" (Vangelis)
-        const vangelisTheme = [
-            // Patrón de arpegio y notas solemnes en Do Mayor / La menor épico
-            { note: 523.25, dur: 0.18 }, // C5
-            { note: 659.25, dur: 0.18 }, // E5
-            { note: 783.99, dur: 0.18 }, // G5
-            { note: 659.25, dur: 0.18 }, // E5
-            { note: 880.00, dur: 0.35 }, // A5 (prolongada)
-            { note: 783.99, dur: 0.18 }, // G5
-            { note: 659.25, dur: 0.18 }, // E5
-            { note: 523.25, dur: 0.35 }, // C5
-            
-            { note: 587.33, dur: 0.18 }, // D5
-            { note: 698.46, dur: 0.18 }, // F5
-            { note: 880.00, dur: 0.18 }, // A5
-            { note: 698.46, dur: 0.18 }, // F5
-            { note: 987.77, dur: 0.4 },  // B5 (punto álgido)
-            { note: 880.00, dur: 0.2 },  // A5
-            { note: 783.99, dur: 0.4 }   // G5
+        // Secuencia fiel al patrón rítmico y melódico legendario de "Chariots of Fire" (Vangelis)
+        const chariotsTheme = [
+            // Frase 1: El pulso galopante inicial ascendente
+            { note: 523.25, harm: 1046.50, bass: 130.81, dur: 0.14 }, // C5
+            { note: 587.33, harm: 1174.66, bass: 130.81, dur: 0.14 }, // D5
+            { note: 659.25, harm: 1318.51, bass: 130.81, dur: 0.14 }, // E5
+            { note: 783.99, harm: 1567.98, bass: 196.00, dur: 0.28 }, // G5 (Proyección larga)
+            { note: 659.25, harm: 1318.51, bass: 196.00, dur: 0.14 }, // E5
+            { note: 587.33, harm: 1174.66, bass: 146.83, dur: 0.14 }, // D5
+            { note: 523.25, harm: 1046.50, bass: 130.81, dur: 0.42 }, // C5 (Cierre de frase solemne)
+
+            // Frase 2: El clímax emotivo y expansivo
+            { note: 587.33, harm: 1174.66, bass: 146.83, dur: 0.14 }, // D5
+            { note: 659.25, harm: 1318.51, bass: 146.83, dur: 0.14 }, // E5
+            { note: 783.99, harm: 1567.98, bass: 196.00, dur: 0.14 }, // G5
+            { note: 880.00, harm: 1760.00, bass: 220.00, dur: 0.28 }, // A5 (Punto álgido de emoción)
+            { note: 783.99, harm: 1567.98, bass: 196.00, dur: 0.14 }, // G5
+            { note: 659.25, harm: 1318.51, bass: 196.00, dur: 0.14 }, // E5
+            { note: 783.99, harm: 1567.98, bass: 196.00, dur: 0.50 }  // G5 (Resolución heroica vibrante)
         ];
         let melodyIdx = 0;
 
@@ -335,30 +335,67 @@
             bgmInterval = setInterval(() => {
                 if (!isMusicPlaying || !audioCtx) return;
                 
-                const step = vangelisTheme[melodyIdx];
-                melodyIdx = (melodyIdx + 1) % vangelisTheme.length;
+                const step = chariotsTheme[melodyIdx];
+                melodyIdx = (melodyIdx + 1) % chariotsTheme.length;
 
                 const now = audioCtx.currentTime;
 
-                // Sintetizador estilo analógico (onda triangular suave y envolvente tipo Vangelis)
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                // --- CAPA 1: VOZ PRINCIPAL (Onda triangular con presencia espacial profunda) ---
+                const leadOsc = audioCtx.createOscillator();
+                const leadGain = audioCtx.createGain();
                 
-                osc.type = 'triangle'; // Sonido cálido y espacioso
-                osc.frequency.setValueAtTime(step.note, now);
+                leadOsc.type = 'triangle'; 
+                leadOsc.frequency.setValueAtTime(step.note, now);
                 
-                // Efecto de apertura y cierre de volumen envolvente (Attack / Decay)
-                gain.gain.setValueAtTime(0.001, now);
-                gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + step.dur);
+                leadGain.gain.setValueAtTime(0.001, now);
+                leadGain.gain.linearRampToValueAtTime(0.14, now + 0.03);
+                leadGain.gain.exponentialRampToValueAtTime(0.001, now + step.dur);
                 
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                leadOsc.connect(leadGain);
+                leadGain.connect(audioCtx.destination);
                 
-                osc.start(now);
-                osc.stop(now + step.dur);
+                leadOsc.start(now);
+                leadOsc.stop(now + step.dur);
 
-            }, 210); // Velocidad rítmica pausada y solemne
+
+                // --- CAPA 2: ARMONÍA / SUPERIOR (Capa brillante de octava alta para la atmósfera de sintetizador analógico) ---
+                const harmonyOsc = audioCtx.createOscillator();
+                const harmonyGain = audioCtx.createGain();
+                
+                harmonyOsc.type = 'sine'; 
+                harmonyOsc.frequency.setValueAtTime(step.harm, now); 
+                
+                harmonyGain.gain.setValueAtTime(0.001, now);
+                harmonyGain.gain.linearRampToValueAtTime(0.045, now + 0.04);
+                harmonyGain.gain.exponentialRampToValueAtTime(0.001, now + (step.dur * 0.9));
+                
+                harmonyOsc.connect(harmonyGain);
+                harmonyGain.connect(audioCtx.destination);
+                
+                harmonyOsc.start(now);
+                harmonyOsc.stop(now + (step.dur * 0.9));
+
+
+                // --- CAPA 3: BAJO ORQUESTAL PROFUNDO (Onda de sierra para el cuerpo cinemático) ---
+                if (step.bass) {
+                    const bassOsc = audioCtx.createOscillator();
+                    const bassGain = audioCtx.createGain();
+                    
+                    bassOsc.type = 'sawtooth';
+                    bassOsc.frequency.setValueAtTime(step.bass, now);
+                    
+                    bassGain.gain.setValueAtTime(0.001, now);
+                    bassGain.gain.linearRampToValueAtTime(0.08, now + 0.03);
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, now + step.dur);
+                    
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(audioCtx.destination);
+                    
+                    bassOsc.start(now);
+                    bassOsc.stop(now + step.dur);
+                }
+
+            }, 160); // Tempo ágil, dinámico y totalmente épico
         }
 
         function stopBGM() {
