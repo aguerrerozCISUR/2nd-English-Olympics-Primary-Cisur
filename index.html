@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2nd English Olympic Games CISUR 4th - 5th Grade- Arcade Menu</title>
+    <title>2nd English Olympic Games CISUR - Arcade Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
     <style>
@@ -91,7 +91,7 @@
 
         h1.title {
             font-family: 'Press Start 2P', cursive;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             line-height: 1.5;
             color: var(--cisur-navy);
             text-transform: uppercase;
@@ -101,6 +101,17 @@
             z-index: 5;
         }
         h1.title span { color: var(--cisur-teal); }
+        .title-grade {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--cisur-yellow-dark);
+            background: var(--cisur-navy);
+            padding: 4px 10px;
+            width: fit-content;
+            margin: 8px auto 0 auto;
+            border-radius: 4px;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
 
         p.subtitle {
             font-size: 1.05rem;
@@ -234,7 +245,7 @@
 
         <!-- MENU SCREEN -->
         <div id="menu-screen" class="screen">
-            <h1 class="title">🏆 2nd English<br><span>Olympic Games</span><br>CISUR</h1>
+            <h1 class="title">🏆 2nd English<br><span>Olympic Games</span><br>CISUR <span class="title-grade">4th - 5th Grade</span></h1>
             <p class="subtitle">
                 Select a game to start the interactive challenge!<br>
                 <b>Interactive Board Edition — Teacher-controlled pace.</b>
@@ -284,7 +295,7 @@
         let bgmInterval = null;
         let isMusicPlaying = false;
 
-        // Secuencia fiel al patrón rítmico y melódico legendario de "Chariots of Fire" (Vangelis)
+        // Secuencia polifónica ultra-épica estilo "Chariots of Fire" (Vangelis)
         const chariotsTheme = [
             // Frase 1: El pulso galopante inicial ascendente
             { note: 523.25, harm: 1046.50, bass: 130.81, dur: 0.14 }, // C5
@@ -340,7 +351,7 @@
 
                 const now = audioCtx.currentTime;
 
-                // --- CAPA 1: VOZ PRINCIPAL (Onda triangular con presencia espacial profunda) ---
+                // --- CAPA 1: VOZ PRINCIPAL ---
                 const leadOsc = audioCtx.createOscillator();
                 const leadGain = audioCtx.createGain();
                 
@@ -358,7 +369,7 @@
                 leadOsc.stop(now + step.dur);
 
 
-                // --- CAPA 2: ARMONÍA / SUPERIOR (Capa brillante de octava alta para la atmósfera de sintetizador analógico) ---
+                // --- CAPA 2: ARMONÍA / SUPERIOR ---
                 const harmonyOsc = audioCtx.createOscillator();
                 const harmonyGain = audioCtx.createGain();
                 
@@ -376,7 +387,7 @@
                 harmonyOsc.stop(now + (step.dur * 0.9));
 
 
-                // --- CAPA 3: BAJO ORQUESTAL PROFUNDO (Onda de sierra para el cuerpo cinemático) ---
+                // --- CAPA 3: BAJO ORQUESTAL PROFUNDO ---
                 if (step.bass) {
                     const bassOsc = audioCtx.createOscillator();
                     const bassGain = audioCtx.createGain();
@@ -395,7 +406,7 @@
                     bassOsc.stop(now + step.dur);
                 }
 
-            }, 160); // Tempo ágil, dinámico y totalmente épico
+            }, 160); 
         }
 
         function stopBGM() {
