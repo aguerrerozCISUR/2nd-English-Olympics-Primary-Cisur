@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2nd English Olympic Games CISUR - Spelling Bee</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --cisur-navy: #051c4a;
+        --cisur-yellow: #fccb10;
+        --cisur-yellow-dark: #cfa50a;
+        --cisur-teal: #005b6e;
+        --cisur-white: #ffffff;
+        
+        --canvas-sky: #e0f7fa;
+        --wrong-red: #ff4757;
+        --correct-green: #2ed573;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: radial-gradient(circle at 50% 50%, #0a2e73, var(--cisur-navy));
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+        padding: 100px 20px 40px 20px; 
+        color: var(--cisur-white);
+        overflow-y: auto; 
+    }
+
+    /* CONTENEDOR PRINCIPAL - ESTILO MÁQUINA ARCADE */
+    .game-card {
+        position: relative;
+        background: var(--cisur-white);
+        border-radius: 10px;
+        width: 100%;
+        max-width: 800px;
+        padding: 40px 30px 25px;
+        text-align: center;
+        box-shadow: 
+            0 0 0 6px var(--cisur-yellow),
+            0 0 0 16px var(--cisur-navy),
+            0 20px 50px rgba(0,0,0,0.9);
+        color: var(--cisur-navy);
+        margin: auto;
+    }
+
+    /* EFECTO SCANLINES (CRT TV) */
+    .game-card::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 10px;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        z-index: 2;
+        background-size: 100% 4px, 3px 100%;
+        pointer-events: none;
+    }
+
+    /* HEADER Y LOGO */
+    .credits-header {
+        position: absolute;
+        top: -95px; 
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        color: var(--cisur-white);
+        font-size: 0.9rem;
+        font-family: 'Press Start 2P', cursive;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+        z-index: 10;
+    }
+    
+    .school-logo {
+        height: 75px;
+        width: 75px;
+        border-radius: 50%;
+        box-shadow: 0 4px 15px rgba(252, 203, 16, 0.5);
+        border: 3px solid var(--cisur-white);
+        background-color: var(--cisur-navy);
+    }
+
+    .marquee {
+        text-align: center;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 5;
+    }
+    .marquee .eyebrow {
+        display: inline-block;
+        color: var(--cisur-navy);
+        font-weight: 800;
+        letter-spacing: 2px;
+        font-size: 11px;
+        text-transform: uppercase;
+        background: var(--cisur-yellow);
+        border: 2px solid var(--cisur-navy);
+        padding: 5px 14px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+        font-family: 'Press Start 2P', cursive;
+    }
+    h1 {
+        margin: 0;
+        font-family: 'Press Start 2P', cursive;
+        font-size: clamp(20px, 4.5vw, 30px);
+        color: var(--cisur-navy);
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    h1 .bee {
+        display: inline-block;
+        animation: wiggle 2.4s ease-in-out infinite;
+    }
+    @keyframes wiggle {
+        0%,100%{transform:rotate(-6deg) translateY(0);}
+        50%{transform:rotate(6deg) translateY(-4px);}
+    }
+
+    .scoreboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        gap: 10px;
+        position: relative;
+        z-index: 5;
+    }
+    .stat {
+        flex: 1;
+        background: #000;
+        border: 4px solid var(--cisur-teal);
+        border-radius: 0px;
+        padding: 10px 6px;
+        text-align: center;
+        box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    }
+    .stat .num {
+        font-size: 18px;
+        font-family: 'Press Start 2P', cursive;
+        color: var(--cisur-yellow);
+        line-height: 1;
+        text-shadow: 1px 1px 0 #fff;
+    }
+    .stat .lab {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #fff;
+        font-family: 'Press Start 2P', cursive;
+        margin-top: 6px;
+    }
+
+    .round-badge {
+        text-align: center;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 5;
+    }
+    #category {
+        display: inline-block;
+        font-family: 'Press Start 2P', cursive;
+        color: #fff;
+        background: var(--cisur-teal);
+        padding: 8px 16px;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border: 3px solid var(--cisur-navy);
+        box-shadow: 3px 3px 0 var(--cisur-navy);
+    }
+
+    .announcer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--canvas-sky);
+        border: 4px solid var(--cisur-navy);
+        border-radius: 10px;
+        padding: 14px;
+        margin: 15px 0 15px;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+        position: relative;
+        z-index: 5;
+        text-align: left;
+    }
+    .announcer .avatar {
+        font-size: 35px;
+        flex-shrink: 0;
+    }
+    .announcer .speech {
+        color: var(--cisur-navy);
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 700;
+    }
+    .announcer .speech b { color: var(--cisur-teal); font-family: 'Press Start 2P', cursive; font-size: 0.7rem; display: inline-block; margin-top: 2px;}
+
+    .mic-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        background: var(--cisur-yellow);
+        color: var(--cisur-navy);
+        border: 4px solid var(--cisur-navy);
+        padding: 14px;
+        border-radius: 0px;
+        font-size: 0.95rem;
+        font-family: 'Press Start 2P', cursive;
+        cursor: pointer;
+        box-shadow: 6px 6px 0 var(--cisur-navy);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 10;
+        text-transform: uppercase;
+    }
+    .mic-btn:active {
+        transform: translate(4px, 4px);
+        box-shadow: 2px 2px 0 var(--cisur-navy);
+    }
+    .mic-btn:hover { background: #fff; }
+
+    .instructions {
+        text-align: center;
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 8px;
+        font-weight: 700;
+        position: relative;
+        z-index: 5;
+    }
+
+    #tiles {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin: 10px 0;
+        min-height: 50px;
+        position: relative;
+        z-index: 5;
+    }
+    .tile {
+        width: 36px;
+        height: 44px;
+        border: 3px solid var(--cisur-navy);
+        border-radius: 0px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-family: 'Press Start 2P', cursive;
+        color: var(--cisur-navy);
+        text-transform: uppercase;
+        box-shadow: 3px 3px 0 var(--cisur-navy);
+    }
+    .tile.filled {
+        background: var(--canvas-sky);
+    }
+    .tile.active {
+        border-color: var(--cisur-teal);
+    }
+    .tile.correct {
+        border-color: var(--cisur-navy);
+        background: var(--correct-green);
+        color: var(--cisur-navy);
+        animation: pop 0.3s ease;
+    }
+    .tile.wrong {
+        border-color: var(--cisur-navy);
+        background: var(--wrong-red);
+        color: #fff;
+        animation: shake 0.4s ease;
+    }
+    @keyframes pop {
+        0%{transform:scale(1);}
+        50%{transform:scale(1.18);}
+        100%{transform:scale(1);}
+    }
+    @keyframes shake {
+        0%,100%{transform:translateX(0);}
+        20%{transform:translateX(-6px);}
+        40%{transform:translateX(6px);}
+        60%{transform:translateX(-4px);}
+        80%{transform:translateX(4px);}
+    }
+
+    #hiddenInput {
+        position: absolute;
+        opacity: 0;
+        height: 1px;
+        width: 1px;
+        pointer-events: none;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        position: relative;
+        z-index: 10;
+    }
+    .action-row button {
+        flex: 1;
+        border: 4px solid var(--cisur-navy);
+        padding: 12px 8px;
+        border-radius: 0px;
+        font-size: 0.85rem;
+        font-family: 'Press Start 2P', cursive;
+        cursor: pointer;
+        color: var(--cisur-navy);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        text-transform: uppercase;
+        box-shadow: 4px 4px 0 var(--cisur-navy);
+    }
+    .action-row button:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0 var(--cisur-navy); }
+
+    #checkBtn {
+        background: var(--correct-green);
+    }
+
+    #nextBtn {
+        background: #00d2d3;
+    }
+
+    #hintBtn {
+        background: var(--cisur-yellow);
+        flex: 0.5;
+    }
+
+    #feedback {
+        min-height: 28px;
+        margin-top: 12px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 13px;
+        border-radius: 6px;
+        padding: 0 6px;
+        position: relative;
+        z-index: 5;
+        font-family: 'Nunito', sans-serif;
+    }
+    #feedback.show {
+        padding: 8px 6px;
+    }
+    #feedback.correct-msg {
+        background: var(--correct-green);
+        color: var(--cisur-navy);
+        font-weight: 900;
+    }
+    #feedback.wrong-msg {
+        background: var(--wrong-red);
+        color: #fff;
+        font-weight: 900;
+    }
+
+    .hive {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 5;
+    }
+    .cell {
+        width: 22px;
+        height: 22px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: grayscale(1) opacity(0.3);
+        transition: filter 0.3s ease, transform 0.3s ease;
+    }
+    .cell.lit {
+        filter: none;
+        transform: scale(1.15);
+    }
+
+    .sound-toggle {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        background: var(--cisur-navy);
+        border: 2px solid var(--cisur-yellow);
+        color: var(--cisur-yellow);
+        font-size: 10px;
+        font-family: 'Press Start 2P', cursive;
+        padding: 6px 10px;
+        border-radius: 0px;
+        cursor: pointer;
+        z-index: 20;
+    }
+
+    footer.note {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="credits-header">
+        <img src="image_e81ebf.png" alt="CISUR Logo" class="school-logo" onerror="this.style.display='none'">
+        <div>Institución Educativa Ciudadela del Sur</div>
+    </div>
+
+    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊 Sound On</button>
+
+    <div class="marquee">
+        <span class="eyebrow">🏆 English Championship</span>
+        <h1><span class="bee">🐝</span> Spelling Bee <span class="bee">🐝</span></h1>
+    </div>
+
+    <div class="scoreboard">
+        <div class="stat">
+            <div class="num" id="scoreNum">0</div>
+            <div class="lab">Score</div>
+        </div>
+        <div class="stat">
+            <div class="num" id="streakNum">0</div>
+            <div class="lab">Streak 🔥</div>
+        </div>
+        <div class="stat">
+            <div class="num" id="roundNum">1</div>
+            <div class="lab">Word</div>
+        </div>
+    </div>
+
+    <div class="round-badge">
+        <div id="category">Category: -</div>
+    </div>
+
+    <div class="announcer">
+        <div class="avatar">🎙️🐝</div>
+        <div class="speech">The Bee Judge says:<br><b>"Please spell the word."</b></div>
+    </div>
+
+    <button class="mic-btn" onclick="speakWord()"><span class="icon">🔊</span> Listen to the Word</button>
+
+    <div class="instructions">Type each letter in its box</div>
+
+    <div id="tiles"></div>
+    <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="characters" spellcheck="false">
+
+    <div class="action-row">
+        <button id="hintBtn" onclick="giveHint()">💡 HINT</button>
+        <button id="checkBtn" onclick="checkAnswer()">✅ CHECK</button>
+        <button id="nextBtn" onclick="nextWord()">NEXT ➔</button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="hive" id="hive"></div>
+
+    <footer class="note">Made for young English spelling champions 🌟</footer>
+</div>
+
+<script>
+  const vocabulary = [
+    // 1. VERBS
+    { word: "ANSWER", category: "Verbs" },
+    { word: "BECOME", category: "Verbs" },
+    { word: "CATCH", category: "Verbs" },
+    { word: "DANCE", category: "Verbs" },
+    { word: "ENCOURAGE", category: "Verbs" },
+    { word: "FORGET", category: "Verbs" },
+    { word: "GLIDE", category: "Verbs" },
+    { word: "HYPNOTIZE", category: "Verbs" },
+    { word: "KNOCK", category: "Verbs" },
+    { word: "LAUGH", category: "Verbs" },
+    { word: "MEMORIZE", category: "Verbs" },
+    { word: "PROMISE", category: "Verbs" },
+    { word: "REMEMBER", category: "Verbs" },
+    { word: "SPEAK", category: "Verbs" },
+    { word: "TRAVEL", category: "Verbs" },
+
+    // 2. HOUSING
+    { word: "ATTIC", category: "Housing" },
+    { word: "BATHROOM", category: "Housing" },
+    { word: "CEILING", category: "Housing" },
+    { word: "DISHWASHER", category: "Housing" },
+    { word: "ELEVATOR", category: "Housing" },
+    { word: "FIREPLACE", category: "Housing" },
+    { word: "GARDEN", category: "Housing" },
+    { word: "KITCHEN", category: "Housing" },
+    { word: "MICROWAVE", category: "Housing" },
+    { word: "OVEN", category: "Housing" },
+    { word: "PILLOW", category: "Housing" },
+    { word: "ROOF", category: "Housing" },
+    { word: "STAIRS", category: "Housing" },
+    { word: "TOILET", category: "Housing" },
+    { word: "WINDOW", category: "Housing" },
+
+    // 3. NATURE
+    { word: "ARCTIC", category: "Nature" },
+    { word: "COAST", category: "Nature" },
+    { word: "DESERT", category: "Nature" },
+    { word: "EARTHQUAKE", category: "Nature" },
+    { word: "GROUND", category: "Nature" },
+    { word: "ISLAND", category: "Nature" },
+    { word: "JUNGLE", category: "Nature" },
+    { word: "LANDSCAPE", category: "Nature" },
+    { word: "MOUNTAIN", category: "Nature" },
+    { word: "PREDATOR", category: "Nature" },
+    { word: "RAINFOREST", category: "Nature" },
+    { word: "SUNNY", category: "Nature" },
+    { word: "TUNNEL", category: "Nature" },
+    { word: "VALLEY", category: "Nature" },
+    { word: "WATERFALL", category: "Nature" },
+
+    // 4. PLACES
+    { word: "AIRPORT", category: "Places" },
+    { word: "BOOKSTORE", category: "Places" },
+    { word: "CHURCH", category: "Places" },
+    { word: "FACTORY", category: "Places" },
+    { word: "GYM", category: "Places" },
+    { word: "HIGHWAY", category: "Places" },
+    { word: "LIBRARY", category: "Places" },
+    { word: "MONUMENT", category: "Places" },
+    { word: "NIGHTCLUB", category: "Places" },
+    { word: "PHARMACY", category: "Places" },
+    { word: "RESTAURANT", category: "Places" },
+    { word: "STADIUM", category: "Places" },
+    { word: "TEMPLE", category: "Places" },
+    { word: "UNIVERSITY", category: "Places" },
+    { word: "VILLAGE", category: "Places" },
+
+    // 5. JOBS
+    { word: "ACTRESS", category: "Jobs" },
+    { word: "BAKER", category: "Jobs" },
+    { word: "CARPENTER", category: "Jobs" },
+    { word: "DESIGNER", category: "Jobs" },
+    { word: "FIREMAN", category: "Jobs" },
+    { word: "GYNECOLOGIST", category: "Jobs" },
+    { word: "HAIRDRESSER", category: "Jobs" },
+    { word: "JUDGE", category: "Jobs" },
+    { word: "LAWYER", category: "Jobs" },
+    { word: "MECHANIC", category: "Jobs" },
+    { word: "PILOT", category: "Jobs" },
+    { word: "RECEPTIONIST", category: "Jobs" },
+    { word: "SCIENTIST", category: "Jobs" },
+    { word: "TRANSLATOR", category: "Jobs" },
+    { word: "WAITER", category: "Jobs" },
+
+    // 6. ADJECTIVES
+    { word: "AUTHENTIC", category: "Adjectives" },
+    { word: "BUSY", category: "Adjectives" },
+    { word: "CONFIDENT", category: "Adjectives" },
+    { word: "DIZZY", category: "Adjectives" },
+    { word: "EAGER", category: "Adjectives" },
+    { word: "FRIENDLY", category: "Adjectives" },
+    { word: "GIGANTIC", category: "Adjectives" },
+    { word: "HEALTHY", category: "Adjectives" },
+    { word: "INNOCENT", category: "Adjectives" },
+    { word: "JEALOUS", category: "Adjectives" },
+    { word: "LAZY", category: "Adjectives" },
+    { word: "MYSTERIOUS", category: "Adjectives" },
+    { word: "OUTSTANDING", category: "Adjectives" },
+    { word: "PLEASANT", category: "Adjectives" },
+    { word: "SCARY", category: "Adjectives" },
+
+    // 7. FRUITS AND VEGETABLES
+    { word: "AVOCADO", category: "Fruits and Vegetables" },
+    { word: "BLACKBERRY", category: "Fruits and Vegetables" },
+    { word: "CELERY", category: "Fruits and Vegetables" },
+    { word: "EGGPLANT", category: "Fruits and Vegetables" },
+    { word: "FIG", category: "Fruits and Vegetables" },
+    { word: "GRAPE", category: "Fruits and Vegetables" },
+    { word: "LEMON", category: "Fruits and Vegetables" },
+    { word: "MUSHROOM", category: "Fruits and Vegetables" },
+    { word: "ONION", category: "Fruits and Vegetables" },
+    { word: "PINEAPPLE", category: "Fruits and Vegetables" },
+    { word: "RADISH", category: "Fruits and Vegetables" },
+    { word: "TOMATO", category: "Fruits and Vegetables" },
+    { word: "WATERMELON", category: "Fruits and Vegetables" },
+    { word: "YAM", category: "Fruits and Vegetables" },
+    { word: "ZUCCHINI", category: "Fruits and Vegetables" },
+
+    // 8. CLOTHING AND ACCESSORIES
+    { word: "BRACELET", category: "Clothing and Accessories" },
+    { word: "DRESS", category: "Clothing and Accessories" },
+    { word: "EARRING", category: "Clothing and Accessories" },
+    { word: "GLASSES", category: "Clothing and Accessories" },
+    { word: "HEADBAND", category: "Clothing and Accessories" },
+    { word: "JACKET", category: "Clothing and Accessories" },
+    { word: "MITTEN", category: "Clothing and Accessories" },
+    { word: "NECKLACE", category: "Clothing and Accessories" },
+    { word: "PAJAMAS", category: "Clothing and Accessories" },
+    { word: "RAINCOAT", category: "Clothing and Accessories" },
+    { word: "SWEATSHIRT", category: "Clothing and Accessories" },
+    { word: "TIE", category: "Clothing and Accessories" },
+    { word: "UMBRELLA", category: "Clothing and Accessories" },
+    { word: "VEST", category: "Clothing and Accessories" },
+    { word: "WALLET", category: "Clothing and Accessories" },
+
+    // 9. HUMAN BODY
+    { word: "ARMPIT", category: "Human Body" },
+    { word: "BRAIN", category: "Human Body" },
+    { word: "CHEST", category: "Human Body" },
+    { word: "ELBOW", category: "Human Body" },
+    { word: "FINGER", category: "Human Body" },
+    { word: "HAIR", category: "Human Body" },
+    { word: "KNEE", category: "Human Body" },
+    { word: "LIVER", category: "Human Body" },
+    { word: "MOUTH", category: "Human Body" },
+    { word: "NOSE", category: "Human Body" },
+    { word: "RIB", category: "Human Body" },
+    { word: "SKIN", category: "Human Body" },
+    { word: "TONGUE", category: "Human Body" },
+    { word: "VEIN", category: "Human Body" },
+    { word: "WAIST", category: "Human Body" },
+
+    // 10. SCHOOL AND EDUCATION
+    { word: "BACKPACK", category: "School and Education" },
+    { word: "CALCULATOR", category: "School and Education" },
+    { word: "DICTIONARY", category: "School and Education" },
+    { word: "EXAM", category: "School and Education" },
+    { word: "FOLDER", category: "School and Education" },
+    { word: "GEOGRAPHY", category: "School and Education" },
+    { word: "HIGHLIGHTER", category: "School and Education" },
+    { word: "KINDERGARTEN", category: "School and Education" },
+    { word: "LANGUAGE", category: "School and Education" },
+    { word: "MATHEMATICS", category: "School and Education" },
+    { word: "NOTEBOOK", category: "School and Education" },
+    { word: "PHYSICS", category: "School and Education" },
+    { word: "RULER", category: "School and Education" },
+    { word: "SCISSORS", category: "School and Education" },
+    { word: "WHITEBOARD", category: "School and Education" }
+  ];
+
+  let currentItem = {};
+  let score = 0;
+  let streak = 0;
+  let round = 0;
+  let hiveCells = [];
+  let usedIndices = [];
+  let soundOn = true;
+  let audioCtx = null;
+
+  const tilesEl = document.getElementById('tiles');
+  const hiddenInput = document.getElementById('hiddenInput');
+  const feedbackEl = document.getElementById('feedback');
+  const hiveEl = document.getElementById('hive');
+  const soundToggleBtn = document.getElementById('soundToggle');
+
+  const cheers = ["Excellent! 🎉", "Perfect! 🌟", "You're a champion! 🏆", "Amazing! 👏", "Great job! ✨"];
+  const tryAgain = ["So close, try again! 💪", "Don't give up! 🐝", "Almost there, one more try! 🎯"];
+
+  function getAudioCtx(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function toggleSound(){
+    soundOn = !soundOn;
+    soundToggleBtn.textContent = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
+  }
+
+  function playTone(freq, startTime, duration, type, gainValue){
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(gainValue || 0.2, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  }
+
+  function playCorrectSound(){
+    if(!soundOn) return;
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    playTone(523.25, now, 0.18, 'triangle', 0.22);
+    playTone(659.25, now + 0.12, 0.18, 'triangle', 0.22);
+    playTone(783.99, now + 0.24, 0.28, 'triangle', 0.24);
+  }
+
+  function playWrongSound(){
+    if(!soundOn) return;
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    playTone(220, now, 0.22, 'sawtooth', 0.18);
+    playTone(174.61, now + 0.15, 0.3, 'sawtooth', 0.18);
+  }
+
+  function buildHive(){
+    hiveEl.innerHTML = '';
+    hiveCells = [];
+    for(let i=0;i<vocabulary.length;i++){
+      const c = document.createElement('div');
+      c.className = 'cell';
+      c.textContent = '⬡';
+      hiveEl.appendChild(c);
+      hiveCells.push(c);
+    }
+  }
+
+  function buildTiles(len){
+    tilesEl.innerHTML = '';
+    for(let i=0;i<len;i++){
+      const t = document.createElement('div');
+      t.className = 'tile';
+      tilesEl.appendChild(t);
+    }
+    updateTilesDisplay('');
+    hiddenInput.value = '';
+    hiddenInput.maxLength = len;
+    hiddenInput.focus();
+  }
+
+  function updateTilesDisplay(value){
+    const tiles = tilesEl.children;
+    for(let i=0;i<tiles.length;i++){
+      const ch = value[i] || '';
+      tiles[i].textContent = ch;
+      tiles[i].classList.toggle('filled', !!ch);
+      tiles[i].classList.toggle('active', i === value.length);
+      tiles[i].classList.remove('correct','wrong');
+    }
+  }
+
+  hiddenInput.addEventListener('input', () => {
+    let v = hiddenInput.value.toUpperCase().replace(/[^A-Z]/g,'');
+    hiddenInput.value = v;
+    hiddenInput.setSelectionRange(v.length, v.length);
+    updateTilesDisplay(v);
+  });
+
+  hiddenInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ checkAnswer(); }
+  });
+
+  tilesEl.addEventListener('click', () => hiddenInput.focus());
+
+  function pickNextIndex(){
+    if(usedIndices.length >= vocabulary.length) usedIndices = [];
+    let idx;
+    do{
+      idx = Math.floor(Math.random() * vocabulary.length);
+    } while(usedIndices.includes(idx));
+    usedIndices.push(idx);
+    return idx;
+  }
+
+  function nextWord(){
+    feedbackEl.className = '';
+    feedbackEl.textContent = '';
+    round++;
+    document.getElementById('roundNum').textContent = round;
+
+    const idx = pickNextIndex();
+    currentItem = vocabulary[idx];
+    document.getElementById('category').textContent = "Category: " + currentItem.category;
+    buildTiles(currentItem.word.length);
+    speakWord();
+  }
+
+  function speakWord(){
+    if('speechSynthesis' in window){
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance("The word is " + currentItem.word + ". " + currentItem.word + ".");
+      utterance.lang = 'en-US';
+      utterance.rate = 0.75;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function giveHint(){
+    const w = currentItem.word;
+    const hintText = w[0] + "•".repeat(w.length - 1);
+    feedbackEl.className = 'show';
+    feedbackEl.style.background = '#e0f7fa';
+    feedbackEl.style.color = '#051c4a';
+    feedbackEl.textContent = "💡 Hint: starts with \"" + w[0] + "\" (" + hintText + ")";
+  }
+
+  function checkAnswer(){
+    const input = hiddenInput.value.toUpperCase().replace(/[^A-Z]/g,'');
+    const target = currentItem.word.toUpperCase();
+    const tiles = tilesEl.children;
+
+    if(input.length !== target.length){
+      for(let i=0;i<tiles.length;i++){ tiles[i].classList.add('wrong'); }
+      feedbackEl.className = 'show wrong-msg';
+      feedbackEl.textContent = "✏️ Fill in all the boxes before checking";
+      return;
+    }
+
+    if(input === target){
+      for(let i=0;i<tiles.length;i++){ tiles[i].classList.add('correct'); }
+      score += 10 + streak * 2;
+      streak++;
+      document.getElementById('scoreNum').textContent = score;
+      document.getElementById('streakNum').textContent = streak;
+
+      const msg = cheers[Math.floor(Math.random()*cheers.length)];
+      feedbackEl.className = 'show correct-msg';
+      feedbackEl.textContent = msg + "  " + target;
+
+      const cellIndex = (round - 1) % hiveCells.length;
+      if(hiveCells[cellIndex]) hiveCells[cellIndex].classList.add('lit');
+
+      playCorrectSound();
+
+      if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance("Correct! " + target);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+      }
+    } else {
+      for(let i=0;i<tiles.length;i++){
+        if(input[i] === target[i]){
+          tiles[i].classList.add('correct');
+        } else {
+          tiles[i].classList.add('wrong');
+        }
+      }
+      streak = 0;
+      document.getElementById('streakNum').textContent = streak;
+      const msg = tryAgain[Math.floor(Math.random()*tryAgain.length)];
+      feedbackEl.className = 'show wrong-msg';
+      feedbackEl.textContent = msg;
+
+      playWrongSound();
+    }
+  }
+
+  window.onload = () => {
+    buildHive();
+    nextWord();
+  };
+</script>
+
+</body>
+</html>
