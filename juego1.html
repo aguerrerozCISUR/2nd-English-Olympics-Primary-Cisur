@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2nd English Olympic Games CISUR - Guess The Movie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        :root {
+            --cisur-navy: #051c4a;
+            --cisur-yellow: #fccb10;
+            --cisur-yellow-dark: #cfa50a;
+            --cisur-teal: #005b6e;
+            --cisur-white: #ffffff;
+            
+            --canvas-sky: #e0f7fa;
+            --wrong-red: #ff4757;
+            --correct-green: #2ed573;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #0a2e73, var(--cisur-navy));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 100px 20px 40px 20px; 
+            color: var(--cisur-white);
+            overflow-y: auto; 
+        }
+
+        .game-card {
+            position: relative;
+            background: var(--cisur-white);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px 30px 25px;
+            text-align: center;
+            box-shadow: 
+                0 0 0 6px var(--cisur-yellow),
+                0 0 0 16px var(--cisur-navy),
+                0 20px 50px rgba(0,0,0,0.9);
+            color: var(--cisur-navy);
+            margin: auto;
+        }
+
+        /* EFECTO SCANLINES (CRT TV) */
+        .game-card::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            border-radius: 10px;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .credits-header {
+            position: absolute;
+            top: -95px; 
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            color: var(--cisur-white);
+            font-size: 0.9rem;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        .school-logo {
+            height: 75px;
+            width: 75px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(252, 203, 16, 0.5);
+            border: 3px solid var(--cisur-white);
+            background-color: var(--cisur-navy);
+        }
+
+        h1.title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            line-height: 1.5;
+            color: var(--cisur-navy);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+        h1.title span { color: var(--cisur-teal); }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 20px;
+        }
+
+        .btn-main {
+            background: var(--cisur-yellow);
+            color: var(--cisur-navy);
+            border: 4px solid var(--cisur-navy);
+            border-radius: 0px; 
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 var(--cisur-navy);
+            margin-top: 15px;
+            transition: all 0.1s;
+            position: relative;
+            z-index: 10;
+        }
+        .btn-main:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--cisur-navy); }
+        .btn-main:hover { background: #fff; }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            color: var(--cisur-white);
+            padding: 15px 20px;
+            border: 4px solid var(--cisur-teal);
+            font-size: 0.8rem;
+            font-family: 'Press Start 2P', cursive;
+            margin-bottom: 15px;
+            flex-wrap: wrap; 
+            gap: 10px;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 5;
+        }
+        .hud span { color: var(--cisur-yellow); text-shadow: 1px 1px 0 #fff; }
+
+        /* Timer Bar Visual de 15s */
+        .timer-bar-container {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            margin-bottom: 20px;
+            background: #000;
+            border: 4px solid #333;
+            z-index: 5;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--cisur-teal), #00d2d3, var(--cisur-yellow));
+            transition: width 0.05s linear;
+        }
+
+        /* EMOJI BOX */
+        .emoji-box {
+            background: var(--canvas-sky);
+            border: 6px solid var(--cisur-navy);
+            border-radius: 10px;
+            padding: 25px 10px;
+            font-size: 3.8rem;
+            margin-bottom: 20px;
+            letter-spacing: 10px;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.1);
+            min-height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* OPTIONS GRID */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 15px;
+        }
+
+        .btn-option {
+            background: var(--cisur-teal);
+            border: 4px solid var(--cisur-navy);
+            border-radius: 0px;
+            padding: 15px 12px;
+            color: var(--cisur-white);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--cisur-navy);
+            transition: all 0.1s;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        .btn-option:hover { background: #007c96; transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--cisur-navy); }
+        .btn-option:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0 var(--cisur-navy); }
+        .btn-option:disabled { cursor: default; transform: none; box-shadow: 4px 4px 0 var(--cisur-navy); filter: brightness(0.9); }
+
+        .btn-option.correct {
+            background: var(--correct-green) !important;
+            color: var(--cisur-navy) !important;
+            box-shadow: 4px 4px 0 var(--cisur-navy) !important;
+            animation: pop 0.3s ease;
+        }
+
+        .btn-option.wrong {
+            background: var(--wrong-red) !important;
+            color: #fff !important;
+            box-shadow: 4px 4px 0 var(--cisur-navy) !important;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* BOTÓN SIGUIENTE OBLIGATORIO */
+        .btn-next-container {
+            margin-top: 15px;
+            min-height: 55px;
+            position: relative;
+            z-index: 10;
+        }
+        #btn-next {
+            display: none;
+            background: #ff00ff;
+            color: #fff;
+            border: 4px solid #000;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 #000;
+            animation: blinker 1s linear infinite;
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        #btn-next:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #000; animation: none; }
+
+        @keyframes blinker {
+            50% { opacity: 0.7; transform: scale(0.98); }
+        }
+
+        .stamp {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.2rem;
+            color: var(--cisur-yellow);
+            background: #000;
+            border: 6px solid var(--cisur-yellow);
+            padding: 20px 30px;
+            margin: 25px 0;
+            box-shadow: 8px 8px 0px var(--cisur-navy);
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-card">
+        <div class="credits-header">
+            <img src="image_e81ebf.png" alt="CISUR Logo" class="school-logo" onerror="this.style.display='none'">
+            <div>Institución Educativa Ciudadela del Sur</div>
+        </div>
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1 class="title">🎬 GUESS THE MOVIE 🍿</h1>
+            <p class="subtitle">
+                Can you guess the movie using only emojis?<br>
+                <b>15 seconds per challenge! Teacher-controlled pace.</b>
+            </p>
+            <div style="font-size: 3rem; margin-bottom: 20px;">🦁👑👸❄️🏎️</div>
+            <button class="btn-main" onclick="startGame()">INSERT COIN</button>
+        </div>
+
+        <!-- GAMEPLAY SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div>STAGE:<span id="question-num">1</span>/36</div>
+                <div>SCORE:<span id="score">0</span></div>
+            </div>
+
+            <div class="timer-bar-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div id="emoji-display" class="emoji-box">🎬</div>
+
+            <div id="options-container" class="options-grid">
+                <!-- Buttons generated dynamically -->
+            </div>
+
+            <div class="btn-next-container">
+                <button id="btn-next" onclick="nextQuestion()">NEXT STAGE ➔</button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="end-screen" class="screen">
+            <h1 class="title">GAME OVER! 🎉</h1>
+            <div class="stamp" id="final-score">0 pts</div>
+            <p id="feedback-msg" style="font-size: 1.1rem; color: #57606F; margin-bottom: 25px; font-weight: 900;"></p>
+            <button class="btn-main" onclick="startGame()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const moviesData = [
+            { emojis: "🧜‍♀️ 🐠 🦀", title: "The Little Mermaid" },
+            { emojis: "👦 🐉 ⚔️", title: "How to Train Your Dragon" },
+            { emojis: "👶 👔 💼", title: "The Boss Baby" },
+            { emojis: "❄️ 👩‍🦰 ☃️", title: "Frozen" },
+            { emojis: "🐱 👢 ⚔️", title: "Puss in Boots" },
+            { emojis: "🐀 👨‍🍳 🍲", title: "Ratatouille" },
+            { emojis: "🐼 🥋 🥟", title: "Kung Fu Panda" },
+            { emojis: "🦊 🐰 🚨", title: "Zootopia" },
+            { emojis: "🧞‍♂️ 🕌 🧹", title: "Aladdin" },
+            { emojis: "🦈 🌊 🐠", title: "Shark Tale" },
+            { emojis: "🎸 💀 🇲🇽", title: "Coco" },
+            { emojis: "🦁 🦓 🦛", title: "Madagascar" },
+            { emojis: "👑 🐸 💋", title: "The Princess and the Frog" },
+            { emojis: "🌹 👹 🏰", title: "Beauty and the Beast" },
+            { emojis: "👹 🐴 🏰", title: "Shrek" },
+            { emojis: "🦁 👑 🌅", title: "The Lion King" },
+            { emojis: "🌊 🛶 🌋", title: "Moana" },
+            { emojis: "👩‍🦰 🏹 🐻", title: "Brave" },
+            { emojis: "🦕 👦 🏞️", title: "The Good Dinosaur" },
+            { emojis: "👩‍🎤 🌈 🎶", title: "Trolls" },
+            { emojis: "🐔 🚜 🥧", title: "Chicken Run" },
+            { emojis: "🧚‍♀️ 🏴‍☠️ 🌟", title: "Peter Pan" },
+            { emojis: "🐕 🍝 🐩", title: "Lady and the Tramp" },
+            { emojis: "🧠 🦹‍♂️ 🦸‍♂️", title: "Megamind" },
+            { emojis: "🔴 🐼 👧", title: "Turning Red" },
+            { emojis: "🦎 👸 💇‍♀️", title: "Tangled" },
+            { emojis: "🤠 🚀 🧸", title: "Toy Story" },
+            { emojis: "🌊 🛵 🇮🇹", title: "Luca" },
+            { emojis: "🐠 🪸 🔍", title: "Finding Nemo" },
+            { emojis: "🐜 👑 🍃", title: "Antz" },
+            { emojis: "🤖 🧹 🚀", title: "WALL-E" },
+            { emojis: "🤥 🪵 👴", title: "Pinocchio" },
+            { emojis: "🕹️ ✊ 🍭", title: "Wreck-It Ralph" },
+            { emojis: "🎈 🏠 👴", title: "Up" },
+            { emojis: "🐧 🕺 ❄️", title: "Happy Feet" },
+            { emojis: "🏎️ 🏆 🏁", title: "Cars" }
+        ];
+
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let canPlay = true;
+
+        // Audio Synth con volumen alto y estilo retro
+        let audioCtx = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523.25, now); 
+                osc.frequency.setValueAtTime(880, now + 0.15); 
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'tick') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.06, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'win' || type === 'start') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.setValueAtTime(600, now + 0.1);
+                osc.frequency.setValueAtTime(800, now + 0.2);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            }
+        }
+
+        // Aleatoriedad rigurosa (Fisher-Yates)
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+            playSound('start');
+            currentQuestions = shuffle(moviesData);
+            currentIndex = 0;
+            score = 0;
+            document.getElementById('score').innerText = score;
+            showScreen('game-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            canPlay = true;
+            document.getElementById('btn-next').style.display = 'none';
+            const currentMovie = currentQuestions[currentIndex];
+
+            document.getElementById('question-num').innerText = currentIndex + 1;
+            document.getElementById('emoji-display').innerText = currentMovie.emojis;
+
+            const otherMovies = moviesData.filter(m => m.title !== currentMovie.title);
+            const shuffledOthers = shuffle(otherMovies).slice(0, 3);
+            const options = shuffle([currentMovie, ...shuffledOthers]);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.innerText = opt.title;
+                btn.onclick = () => makeChoice(opt.title === currentMovie.title, btn);
+                container.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        // TEMPORIZADOR VISUAL DE 15 SEGUNDOS (No avanza solo)
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = '100%';
+
+            const totalMs = 15000;
+            const intervalMs = 100;
+            let elapsed = 0;
+            let lastTickSecond = 15;
+
+            timerInterval = setInterval(() => {
+                if (!canPlay) return;
+
+                elapsed += intervalMs;
+                const percentage = Math.max(0, 100 - (elapsed / totalMs) * 100);
+                timerBar.style.width = percentage + '%';
+
+                let currentSecond = Math.ceil((totalMs - elapsed) / 1000);
+                if (currentSecond < lastTickSecond && currentSecond >= 0) {
+                    playSound('tick');
+                    lastTickSecond = currentSecond;
+                }
+
+                if (elapsed >= totalMs) {
+                    clearInterval(timerInterval);
+                    // Al llegar a 0 no hace nada automático; espera la interacción manual
+                }
+            }, intervalMs);
+        }
+
+        // CONTROL MANUAL TOTAL (Pausa, feedback y botón Siguiente obligatorio)
+        function makeChoice(isCorrect, selectedBtn) {
+            if (!canPlay) return;
+            canPlay = false;
+            clearInterval(timerInterval);
+
+            const currentMovie = currentQuestions[currentIndex];
+            const buttons = document.querySelectorAll('.btn-option');
+
+            buttons.forEach(btn => {
+                if (btn.innerText === currentMovie.title) {
+                    btn.classList.add('correct');
+                }
+                btn.disabled = true; // Bloquea los demás clics
+            });
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 10;
+                document.getElementById('score').innerText = score;
+            } else {
+                playSound('wrong');
+                if (selectedBtn) {
+                    selectedBtn.classList.add('wrong');
+                }
+            }
+
+            // MOSTRAR BOTÓN DE AVANCE OBLIGATORIO
+            document.getElementById('btn-next').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            playSound('win');
+            showScreen('end-screen');
+            document.getElementById('final-score').innerText = score + ' pts';
+
+            const maxScore = moviesData.length * 10;
+            const msg = document.getElementById('feedback-msg');
+
+            if (score === maxScore) {
+                msg.innerText = "AMAZING! 🎉 You are a true movie master!";
+            } else if (score >= maxScore * 0.7) {
+                msg.innerText = "Great job! 👏 You know almost every movie!";
+            } else if (score >= maxScore * 0.4) {
+                msg.innerText = "Good effort! 👍 Keep practicing to get a higher score.";
+            } else {
+                msg.innerText = "Nice try! 🍿 Play again to beat your record.";
+            }
+        }
+    </script>
+</body>
+</html>

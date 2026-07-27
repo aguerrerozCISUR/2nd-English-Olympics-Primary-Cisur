@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2nd English Olympic Games CISUR - Word Scramble</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        :root {
+            --cisur-navy: #051c4a;
+            --cisur-yellow: #fccb10;
+            --cisur-yellow-dark: #cfa50a;
+            --cisur-teal: #005b6e;
+            --cisur-white: #ffffff;
+            
+            --canvas-sky: #e0f7fa;
+            --wrong-red: #ff4757;
+            --correct-green: #2ed573;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #0a2e73, var(--cisur-navy));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 100px 20px 40px 20px; 
+            color: var(--cisur-white);
+            overflow-y: auto; 
+        }
+
+        .game-card {
+            position: relative;
+            background: var(--cisur-white);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px 30px 25px;
+            text-align: center;
+            box-shadow: 
+                0 0 0 6px var(--cisur-yellow),
+                0 0 0 16px var(--cisur-navy),
+                0 20px 50px rgba(0,0,0,0.9);
+            color: var(--cisur-navy);
+            margin: auto;
+        }
+
+        /* EFECTO SCANLINES (CRT TV) */
+        .game-card::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            border-radius: 10px;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .credits-header {
+            position: absolute;
+            top: -95px; 
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            color: var(--cisur-white);
+            font-size: 0.9rem;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        .school-logo {
+            height: 75px;
+            width: 75px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(252, 203, 16, 0.5);
+            border: 3px solid var(--cisur-white);
+            background-color: var(--cisur-navy);
+        }
+
+        h1.title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            color: var(--cisur-navy);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+        h1.title span { color: var(--cisur-teal); }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 20px;
+        }
+
+        .btn-main {
+            background: var(--cisur-yellow);
+            color: var(--cisur-navy);
+            border: 4px solid var(--cisur-navy);
+            border-radius: 0px; 
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 var(--cisur-navy);
+            margin-top: 15px;
+            transition: all 0.1s;
+            position: relative;
+            z-index: 10;
+        }
+        .btn-main:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--cisur-navy); }
+        .btn-main:hover { background: #fff; }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            color: var(--cisur-white);
+            padding: 15px 20px;
+            border: 4px solid var(--cisur-teal);
+            font-size: 0.8rem;
+            font-family: 'Press Start 2P', cursive;
+            margin-bottom: 15px;
+            flex-wrap: wrap; 
+            gap: 10px;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 5;
+        }
+        .hud span { color: var(--cisur-yellow); text-shadow: 1px 1px 0 #fff; }
+
+        /* Timer Bar Visual de 15s */
+        .timer-bar-container {
+            position: relative;
+            width: 100%;
+            height: 25px;
+            margin-bottom: 15px;
+            background: #000;
+            border: 4px solid #333;
+            z-index: 5;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--cisur-teal), #00d2d3, var(--cisur-yellow));
+            transition: width 0.05s linear;
+        }
+
+        /* Category Indicator */
+        .topic-tag {
+            display: inline-block;
+            background: var(--cisur-teal);
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border: 3px solid var(--cisur-navy);
+            box-shadow: 3px 3px 0 var(--cisur-navy);
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Target Construction Area */
+        .sentence-target {
+            background: var(--canvas-sky);
+            border: 4px dashed var(--cisur-teal);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 110px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.06);
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Source Scrambled Words Pool */
+        .words-pool {
+            background: #fff3cd;
+            border: 4px solid var(--cisur-yellow-dark);
+            border-radius: 10px;
+            padding: 18px;
+            min-height: 110px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Word Chip Buttons */
+        .word-chip {
+            background: #3742FA;
+            color: white;
+            border: 3px solid var(--cisur-navy);
+            border-radius: 0px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--cisur-navy);
+            transition: all 0.1s ease;
+            display: inline-block;
+        }
+        .word-chip:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--cisur-navy); }
+        .word-chip:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--cisur-navy); }
+        .word-chip.placed {
+            background: var(--cisur-teal);
+            box-shadow: 4px 4px 0 var(--cisur-navy);
+        }
+
+        /* Action Buttons */
+        .actions-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-action {
+            background: var(--correct-green);
+            color: var(--cisur-navy);
+            border: 4px solid var(--cisur-navy);
+            border-radius: 0px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--cisur-navy);
+            transition: all 0.1s ease;
+        }
+        .btn-action:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--cisur-navy); }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0 var(--cisur-navy); }
+
+        .btn-clear {
+            background: var(--wrong-red);
+            color: white;
+        }
+
+        /* Animations */
+        .correct-anim {
+            background: var(--correct-green) !important;
+            border-color: var(--cisur-navy) !important;
+        }
+        .wrong-anim {
+            background: var(--wrong-red) !important;
+            border-color: var(--cisur-navy) !important;
+        }
+
+        /* BOTÓN SIGUIENTE OBLIGATORIO */
+        .btn-next-container {
+            margin-top: 15px;
+            min-height: 55px;
+            position: relative;
+            z-index: 10;
+        }
+        #btn-next {
+            display: none;
+            background: #ff00ff;
+            color: #fff;
+            border: 4px solid #000;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 #000;
+            animation: blinker 1s linear infinite;
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        #btn-next:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #000; animation: none; }
+
+        @keyframes blinker {
+            50% { opacity: 0.7; transform: scale(0.98); }
+        }
+
+        .stamp {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.2rem;
+            color: var(--cisur-yellow);
+            background: #000;
+            border: 6px solid var(--cisur-yellow);
+            padding: 20px 30px;
+            margin: 25px 0;
+            box-shadow: 8px 8px 0px var(--cisur-navy);
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-card">
+        <div class="credits-header">
+            <img src="image_e81ebf.png" alt="CISUR Logo" class="school-logo" onerror="this.style.display='none'">
+            <div>Institución Educativa Ciudadela del Sur</div>
+        </div>
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1 class="title">🧩 WORD SCRAMBLE 🧩</h1>
+            <p class="subtitle">
+                Build 50 correct English sentences!<br>
+                <b>15 seconds per challenge. Teacher-controlled pace.</b>
+            </p>
+            <div style="font-size: 3rem; margin-bottom: 20px;">🏫 📐 🏠 🖐️ ⏰ ☀️ 😄</div>
+            <button class="btn-main" onclick="startGame()">INSERT COIN</button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div>STAGE:<span id="question-num">1</span>/50</div>
+                <div>COMBO:<span id="streak">0</span></div>
+                <div>SCORE:<span id="score">0</span></div>
+            </div>
+
+            <div class="timer-bar-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div id="topic-tag" class="topic-tag">TOPIC</div>
+
+            <!-- Target area where words are assembled -->
+            <div id="target-box" class="sentence-target"></div>
+
+            <!-- Scrambled source words -->
+            <div id="pool-box" class="words-pool"></div>
+
+            <div class="actions-row">
+                <button class="btn-action btn-clear" onclick="resetCurrentSentence()">RESET 🔄</button>
+                <button class="btn-action" onclick="checkAnswer()">CHECK 🚀</button>
+            </div>
+
+            <div class="btn-next-container">
+                <button id="btn-next" onclick="nextQuestion()">NEXT STAGE ➔</button>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="screen">
+            <h1 class="title">GAME OVER! 🎉</h1>
+            <div class="stamp" id="final-score">0 pts</div>
+            <p id="feedback-msg" style="font-size: 1.1rem; color: #57606F; margin-bottom: 25px; font-weight: 900;"></p>
+            <button class="btn-main" onclick="startGame()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const sentencesData = [
+            { topic: "School Supplies", original: "I have a yellow pencil." },
+            { topic: "School Supplies", original: "She needs a pink eraser." },
+            { topic: "School Supplies", original: "Use the ruler for lines." },
+            { topic: "School Supplies", original: "Cut the paper with scissors." },
+            { topic: "School Supplies", original: "Open your notebook now." },
+            { topic: "School Supplies", original: "The marker is on the desk." },
+            { topic: "School Supplies", original: "My backpack is heavy." },
+
+            { topic: "Shapes", original: "The sun is a circle." },
+            { topic: "Shapes", original: "Pizza looks like a triangle." },
+            { topic: "Shapes", original: "The window is a square." },
+            { topic: "Shapes", original: "Draw a yellow star." },
+            { topic: "Shapes", original: "An egg has an oval shape." },
+            { topic: "Shapes", original: "The door is a rectangle." },
+            { topic: "Shapes", original: "A ring is a round circle." },
+
+            { topic: "Parts of the House", original: "Mom cooks in the kitchen." },
+            { topic: "Parts of the House", original: "We watch TV in the living room." },
+            { topic: "Parts of the House", original: "I sleep in my bedroom." },
+            { topic: "Parts of the House", original: "Wash your hands in the bathroom." },
+            { topic: "Parts of the House", original: "We eat in the dining room." },
+            { topic: "Parts of the House", original: "Flowers grow in the garden." },
+            { topic: "Parts of the House", original: "The car is in the garage." },
+
+            { topic: "Parts of the Body", original: "Touch your head." },
+            { topic: "Parts of the Body", original: "Raise your hand." },
+            { topic: "Parts of the Body", original: "I see with my eyes." },
+            { topic: "Parts of the Body", original: "Kick the ball with your foot." },
+            { topic: "Parts of the Body", original: "Hear music with your ears." },
+            { topic: "Parts of the Body", original: "She hurt her knee." },
+            { topic: "Parts of the Body", original: "Open your mouth and smile." },
+
+            { topic: "Telling the Time", original: "It is eight o'clock." },
+            { topic: "Telling the Time", original: "School starts at nine." },
+            { topic: "Telling the Time", original: "It is half past three." },
+            { topic: "Telling the Time", original: "Lunch is at twelve o'clock." },
+            { topic: "Telling the Time", original: "It is quarter to five." },
+            { topic: "Telling the Time", original: "The movie starts at seven." },
+            { topic: "Telling the Time", original: "What time is it now?" },
+
+            { topic: "Daily Routine", original: "I wake up early." },
+            { topic: "Daily Routine", original: "She brushes her teeth." },
+            { topic: "Daily Routine", original: "He takes a shower." },
+            { topic: "Daily Routine", original: "We eat breakfast together." },
+            { topic: "Daily Routine", original: "They walk to school." },
+            { topic: "Daily Routine", original: "I do my homework." },
+            { topic: "Daily Routine", original: "He goes to bed at night." },
+
+            { topic: "Describing People", original: "My teacher is kind." },
+            { topic: "Describing People", original: "He is a tall boy." },
+            { topic: "Describing People", original: "She has curly hair." },
+            { topic: "Describing People", original: "My friend is very smart." },
+            { topic: "Describing People", original: "He has big blue eyes." },
+            { topic: "Describing People", original: "The baby is so cute." },
+            { topic: "Describing People", original: "She is a happy girl." },
+            { topic: "Describing People", original: "My dad is very strong." }
+        ];
+
+        let gameQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let timerInterval;
+        let canPlay = true;
+        let placedWords = [];
+        let poolWords = [];
+
+        // Web Audio Synth con volumen alto
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now); osc.stop(now + 0.08);
+            } else if (type === 'correct') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523.25, now); 
+                osc.frequency.setValueAtTime(880, now + 0.15); 
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'tick') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.06, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'start' || type === 'win') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.setValueAtTime(600, now + 0.1);
+                osc.frequency.setValueAtTime(800, now + 0.2);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            }
+        }
+
+        // Aleatoriedad rigurosa (Fisher-Yates)
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+            playSound('start');
+            gameQuestions = shuffle(sentencesData);
+            currentIndex = 0;
+            score = 0;
+            streak = 0;
+            document.getElementById('score').innerText = score;
+            document.getElementById('streak').innerText = streak;
+            showScreen('game-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= gameQuestions.length) {
+                endGame();
+                return;
+            }
+
+            canPlay = true;
+            placedWords = [];
+            document.getElementById('btn-next').style.display = 'none';
+            
+            const item = gameQuestions[currentIndex];
+            document.getElementById('question-num').innerText = currentIndex + 1;
+            document.getElementById('topic-tag').innerText = item.topic;
+
+            const rawWords = item.original.trim().split(/\s+/);
+            poolWords = shuffle(rawWords.map((w, idx) => ({ id: idx, text: w })));
+
+            renderBoxes();
+            startTimer();
+        }
+
+        function renderBoxes() {
+            const targetBox = document.getElementById('target-box');
+            const poolBox = document.getElementById('pool-box');
+
+            targetBox.innerHTML = '';
+            poolBox.innerHTML = '';
+
+            placedWords.forEach((wordObj) => {
+                const chip = document.createElement('button');
+                chip.className = 'word-chip placed';
+                chip.innerText = wordObj.text;
+                chip.onclick = () => removeWord(wordObj);
+                targetBox.appendChild(chip);
+            });
+
+            poolWords.forEach((wordObj) => {
+                const chip = document.createElement('button');
+                chip.className = 'word-chip';
+                chip.innerText = wordObj.text;
+                chip.onclick = () => addWord(wordObj);
+                poolBox.appendChild(chip);
+            });
+        }
+
+        function addWord(wordObj) {
+            if (!canPlay) return;
+            playSound('click');
+            placedWords.push(wordObj);
+            poolWords = poolWords.filter(w => w.id !== wordObj.id);
+            renderBoxes();
+        }
+
+        function removeWord(wordObj) {
+            if (!canPlay) return;
+            playSound('click');
+            poolWords.push(wordObj);
+            placedWords = placedWords.filter(w => w.id !== wordObj.id);
+            renderBoxes();
+        }
+
+        function resetCurrentSentence() {
+            if (!canPlay) return;
+            playSound('click');
+            const rawWords = gameQuestions[currentIndex].original.trim().split(/\s+/);
+            poolWords = shuffle(rawWords.map((w, idx) => ({ id: idx, text: w })));
+            placedWords = [];
+            renderBoxes();
+        }
+
+        // TEMPORIZADOR VISUAL DE 15 SEGUNDOS (Control Manual)
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = '100%';
+
+            const totalMs = 15000;
+            const intervalMs = 100;
+            let elapsed = 0;
+            let lastTickSecond = 15;
+
+            timerInterval = setInterval(() => {
+                if (!canPlay) return;
+
+                elapsed += intervalMs;
+                const percentage = Math.max(0, 100 - (elapsed / totalMs) * 100);
+                timerBar.style.width = percentage + '%';
+
+                let currentSecond = Math.ceil((totalMs - elapsed) / 1000);
+                if (currentSecond < lastTickSecond && currentSecond >= 0) {
+                    playSound('tick');
+                    lastTickSecond = currentSecond;
+                }
+
+                if (elapsed >= totalMs) {
+                    clearInterval(timerInterval);
+                    // Al llegar a 0 no avanza solo; espera la interacción manual
+                }
+            }, intervalMs);
+        }
+
+        function checkAnswer() {
+            if (!canPlay) return;
+            canPlay = false;
+            clearInterval(timerInterval);
+
+            const targetBox = document.getElementById('target-box');
+            const userSentence = placedWords.map(w => w.text).join(' ');
+            const targetSentence = gameQuestions[currentIndex].original.trim();
+
+            if (userSentence === targetSentence) {
+                playSound('correct');
+                targetBox.classList.add('correct-anim');
+                score += 10 + (streak * 2); 
+                streak++;
+                document.getElementById('score').innerText = score;
+                document.getElementById('streak').innerText = streak;
+            } else {
+                playSound('wrong');
+                targetBox.classList.add('wrong-anim');
+                streak = 0;
+                document.getElementById('streak').innerText = streak;
+
+                targetBox.innerHTML = `<span style="color:var(--cisur-navy); font-family:'Press Start 2P'; font-size:0.8rem; line-height:1.5;">Correct: ${targetSentence}</span>`;
+            }
+
+            // MOSTRAR BOTÓN DE AVANCE OBLIGATORIO
+            document.getElementById('btn-next').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            const targetBox = document.getElementById('target-box');
+            targetBox.classList.remove('correct-anim', 'wrong-anim');
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            playSound('win');
+            showScreen('end-screen');
+            document.getElementById('final-score').innerText = score + ' pts';
+
+            const msg = document.getElementById('feedback-msg');
+            if (score >= 400) {
+                msg.innerText = "🌟 OUTSTANDING! You are a Sentence Master!";
+            } else if (score >= 250) {
+                msg.innerText = "🎉 GREAT JOB! Excellent English skills!";
+            } else {
+                msg.innerText = "👍 GOOD EFFORT! Keep practicing to get a higher score!";
+            }
+        }
+    </script>
+</body>
+</html>

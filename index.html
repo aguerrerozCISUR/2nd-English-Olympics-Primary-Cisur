@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2nd English Olympic Games CISUR - Arcade Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        :root {
+            --cisur-navy: #051c4a;
+            --cisur-yellow: #fccb10;
+            --cisur-yellow-dark: #cfa50a;
+            --cisur-teal: #005b6e;
+            --cisur-white: #ffffff;
+            --canvas-sky: #e0f7fa;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #0a2e73, var(--cisur-navy));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            padding: 100px 20px 40px 20px; 
+            color: var(--cisur-white);
+            overflow-y: auto; 
+        }
+
+        .game-card {
+            position: relative;
+            background: var(--cisur-white);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 850px;
+            padding: 40px 30px 30px;
+            text-align: center;
+            box-shadow: 
+                0 0 0 6px var(--cisur-yellow),
+                0 0 0 16px var(--cisur-navy),
+                0 20px 50px rgba(0,0,0,0.9);
+            color: var(--cisur-navy);
+            margin: auto;
+        }
+
+        /* EFECTO SCANLINES (CRT TV) */
+        .game-card::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            border-radius: 10px;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .credits-header {
+            position: absolute;
+            top: -95px; 
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            color: var(--cisur-white);
+            font-size: 0.9rem;
+            font-family: 'Press Start 2P', cursive;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        .school-logo {
+            height: 75px;
+            width: 75px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(252, 203, 16, 0.5);
+            border: 3px solid var(--cisur-white);
+            background-color: var(--cisur-navy);
+        }
+
+        h1.title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            line-height: 1.5;
+            color: var(--cisur-navy);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 5;
+        }
+        h1.title span { color: var(--cisur-teal); }
+
+        p.subtitle {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* MENÚ DE JUEGOS - CUADRÍCULA */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 650px) {
+            .menu-grid { grid-template-columns: 1fr; }
+        }
+
+        .menu-btn {
+            background: var(--cisur-teal);
+            border: 4px solid var(--cisur-navy);
+            border-radius: 0px;
+            padding: 20px 15px;
+            color: var(--cisur-white);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 6px 6px 0 var(--cisur-navy);
+            transition: all 0.1s;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .menu-btn:hover { 
+            background: #007c96; 
+            transform: translate(-3px, -3px); 
+            box-shadow: 9px 9px 0 var(--cisur-navy); 
+        }
+        
+        .menu-btn:active { 
+            transform: translate(4px, 4px); 
+            box-shadow: 2px 2px 0 var(--cisur-navy); 
+        }
+
+        .menu-icon {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            line-height: 1.4;
+            color: var(--cisur-yellow);
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 6px;
+        }
+
+        .menu-desc {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .screen { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 0.05em 0 0.05em;
+            vertical-align: -0.15em;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-card">
+        <div class="credits-header">
+            <img src="image_e81ebf.png" alt="CISUR Logo" class="school-logo" onerror="this.style.display='none'">
+            <div>Institución Educativa Ciudadela del Sur</div>
+        </div>
+
+        <!-- MENU SCREEN -->
+        <div id="menu-screen" class="screen">
+            <h1 class="title">🏆 2nd English<br><span>Olympic Games</span><br>CISUR</h1>
+            <p class="subtitle">
+                Select a game to start the interactive challenge!<br>
+                <b>Interactive Board Edition — Teacher-controlled pace.</b>
+            </p>
+
+            <div class="menu-grid">
+                <!-- JUEGO 1 -->
+                <a href="juego1.html" class="menu-btn" onclick="playClickSound()">
+                    <div class="menu-icon">🎬</div>
+                    <div class="menu-title">Game 1</div>
+                    <div class="menu-desc">Guess the Movie</div>
+                </a>
+
+                <!-- JUEGO 2 -->
+                <a href="juego2.html" class="menu-btn" onclick="playClickSound()">
+                    <div class="menu-icon">🧩</div>
+                    <div class="menu-title">Game 2</div>
+                    <div class="menu-desc">Word Scramble</div>
+                </a>
+
+                <!-- JUEGO 3 -->
+                <a href="juego3.html" class="menu-btn" onclick="playClickSound()">
+                    <div class="menu-icon">⚡</div>
+                    <div class="menu-title">Game 3</div>
+                    <div class="menu-desc">Find the Rhyme</div>
+                </a>
+
+                <!-- JUEGO 4 -->
+                <a href="juego4.html" class="menu-btn" onclick="playClickSound()">
+                    <div class="menu-icon">🏃‍♂️</div>
+                    <div class="menu-title">Game 4</div>
+                    <div class="menu-desc">Complete the Sentences</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playClickSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(660, now + 0.1);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.twemoji) {
+                twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+            }
+        });
+    </script>
+</body>
+</html>
